@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>Setup your device</title>
+  </head>
+
+  <body>
+    <!--<script type="text/javascript" src="http://cdn.jsdelivr.net/particle-api-js/5/particle.min.js"></script>-->
+    <script src='particle.min.js'></script>
+
+    <script>
+      var particle = null;
+      var token = null;
+
+      function login() {
+        particle = new Particle();
+        particle.login({username: document.getElementById("email").value, password: document.getElementById("login-password").value}).then(
+          function(data){
+            console.log('API call completed on promise resolve: ', data.body.access_token);
+            token = data.body.access_token; // from result of particle.login
+            document.getElementById("token").innerHTML = token;
+          }
+        );
+      }
+
+      function getDevices() {
+        var devicesPr = particle.listDevices({ auth: token });
+        devicesPr.then(
+          function(devices){
+            console.log('Devices before: ', devices);
+            document.getElementById("devices").innerHTML = devices.body.length
+          },
+          function(err) {
+            console.log('List devices call failed: ', err);
+            document.getElementById("devices").innerHTML = err.body.length;
+          }
+        );
+      }
+
+      function claimDevice() {
+        var claimID = document.getElementById("deviceid").value;
+        console.log('deviceId', claimID);
+        console.log('auth', token);
+        particle.claimDevice({ deviceId: claimID, auth: token }).then(function(data) {
+          console.log('device claim data:', data);
+        }, function(err) {
+          console.log('device claim err:', err);
+        });
+      }
+    </script>
+
+    <div id="create-user-div">
+      <form action="https://api.particle.io/v1/products/wifidoorbell-v100/customers" method="post">
+          <input type="hidden" name="response_type" value="token" />
+          <input type="hidden" name="client_id" value="testdoorbelloauth-3991" />
+          <div class="form-group">
+              <input type="email" class="form-control" name="email" placeholder="Email">
+          </div>
+          <div class="form-group">
+              <input type="password" class="form-control" name="password" placeholder="Password">
+          </div>
+          <input type="submit" class="btn btn-lg btn-primary btn-block" value="Create User" id="registration-submit">
+       </form>
+     </div>
+
+    <div id="login-div">
+      <input id="email" type="email" class="form-control" name="email" value="test5@test.com"><br>
+      <input id="login-password" type="password" class="form-control" name="login-password" value="test"><br>
+      <button onclick="login()">Login</button><br>
+      <textarea id="token"></textarea><br><br>
+    </div>
+
+    <div id="get-devices-div">
+      <button onclick="getDevices()">Get Devices</button><br>
+      <textarea id="devices"></textarea><br><br>
+    </div>
+
+    <div id="claim-device-div">
+      <input id="deviceid" type="text" class="form-control" name="deviceid" value="33003c000a47353235303037"><br>
+      <button onclick="claimDevice()">Claim Device</button><br>
+    </div>
+
+    <div id='initial-div'>
+    <h2>Soft AP Setup</h2>
+      <p>
+        <ol>
+          <li>Plug-in your device.</li>
+          <li>Make sure it is blinking blue. If it isn't, press and hold the 'S' button until it does.</li>
+          <li>Disconnect from your WiFi and Connect to the new WiFi hotspot it creates. It will appear as <i>Photon-XXXX</i> on your network list.</li>
+          <li>Press Next.</li>
+        </ol>
+      <p>
+      <button id='initial-button' type='button'>Next</button>
+    </div>
+
+    <div id='device-id-div' style='display: none'>
+      <h3>Device ID:</h3>
+      <input type=text id='device-id' size='25' value='' disabled/>
+      <button type='button' class='input-helper' id='copy-button'>Copy</button>
+    </div>
+
+    <div id='scan-div' style='display: none'>
+      <h3>Scan for visible WiFi networks</h3>
+      <button id='scan-button' type='button'>Scan</button>
+    </div>
+
+    <div id='networks-div'>
+    </div>
+
+    <div id='connect-div' style='display: none'>
+      <p>Don't see your network? Move your controller closer to your router, then re-scan.</p>
+      <form id='connect-form'>
+        <input type='password' id='password' size='25' placeholder='password'/>
+        <button type='button' class='input-helper' id='show-button'>Show</button>
+        <button type='submit' id='connect-button'>Connect</button>
+      </form>
+    </div>
+
+    <script src='rsa-utils/jsbn_1.js'></script>
+    <script src='rsa-utils/jsbn_2.js'></script>
+    <script src='rsa-utils/prng4.js'></script>
+    <script src='rsa-utils/rng.js'></script>
+    <script src='rsa-utils/rsa.js'></script>
+    <script src='script.js'></script>
+
+  </body>
+</html>
